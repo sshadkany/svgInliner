@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG to Inline CSS Converter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/material-palenight.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --accent: #06b6d4;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --border: #e2e8f0;
+            --success: #059669;
+            --warning: #d97706;
+            --error: #dc2626;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+        }
+        
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .hover-lift {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .code-editor {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .preview-container {
+            background: var(--surface);
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .preview-container.dragover {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.05);
+        }
+        
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        .status-success { background: var(--success); }
+        .status-warning { background: var(--warning); }
+        .status-error { background: var(--error); }
+        
+        .conversion-stats {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(6, 182, 212, 0.1));
+            border: 1px solid rgba(37, 99, 235, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+        
+        .btn-secondary {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--background);
+            border-color: var(--primary);
+        }
+        
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success { background: var(--success); }
+        .notification.error { background: var(--error); }
+        .notification.warning { background: var(--warning); }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v6a4 4 0 004 4h4a2 2 0 002-2V5z"></path>
+                        </svg>
+                    </div>
+                    <h1 class="text-xl font-bold gradient-text">SVG Converter</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="#about" class="text-gray-600 hover:text-gray-900 transition-colors">About</a>
+                    <a href="#examples" class="text-gray-600 hover:text-gray-900 transition-colors">Examples</a>
+                    <button onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="py-16 bg-gradient-to-br from-blue-50 to-cyan-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-4xl md:text-5xl font-bold mb-6">
+                Convert SVG <span class="gradient-text">Internal CSS</span> to Inline Styles
+            </h2>
+            <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+                Transform your SVG files with embedded CSS into flutter_svg compatible format. 
+                Perfect for Flutter developers who need inline styles instead of class-based CSS.
+            </p>
+            <div class="flex justify-center space-x-4">
+                <button onclick="scrollToConverter()" class="btn-primary">
+                    Start Converting
+                </button>
+                <button onclick="loadExample()" class="btn-secondary">
+                    Load Example
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Converter Section -->
+    <section id="converter" class="py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Input Panel -->
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-2xl font-bold">Input SVG</h3>
+                        <div class="flex space-x-2">
+                            <button onclick="uploadFile()" class="btn-secondary text-sm">
+                                Upload File
+                            </button>
+                            <button onclick="clearInput()" class="btn-secondary text-sm">
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="preview-container" id="inputDropZone">
+                        <div class="text-center">
+                            <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            <p class="text-gray-600 mb-2">Drop SVG file here or click to upload</p>
+                            <p class="text-sm text-gray-500">Supports .svg files with embedded CSS</p>
+                        </div>
+                        <input type="file" id="fileInput" accept=".svg" class="hidden" onchange="handleFileUpload(event)">
+                    </div>
+                    
+                    <div class="code-editor">
+                        <textarea id="inputEditor" placeholder="Paste your SVG code here..."></textarea>
+                    </div>
+                    
+                    <div class="conversion-stats rounded-lg p-4">
+                        <div class="grid grid-cols-3 gap-4 text-center">
+                            <div>
+                                <div class="text-2xl font-bold text-blue-600" id="cssRulesCount">0</div>
+                                <div class="text-sm text-gray-600">CSS Rules</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-green-600" id="elementsCount">0</div>
+                                <div class="text-sm text-gray-600">Elements</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-purple-600" id="classesCount">0</div>
+                                <div class="text-sm text-gray-600">Classes</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Output Panel -->
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-2xl font-bold">Converted SVG</h3>
+                        <div class="flex items-center space-x-2">
+                            <span class="status-indicator status-success" id="conversionStatus"></span>
+                            <span class="text-sm text-gray-600" id="conversionMessage">Ready to convert</span>
+                            <button onclick="copyOutput()" class="btn-primary text-sm">
+                                Copy
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="code-editor">
+                        <textarea id="outputEditor" readonly placeholder="Converted SVG will appear here..."></textarea>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg border border-gray-200 p-4">
+                        <h4 class="font-semibold mb-3">Preview</h4>
+                        <div class="bg-gray-50 rounded-lg p-8 flex items-center justify-center min-h-[200px]" id="svgPreview">
+                            <p class="text-gray-500">SVG preview will appear here</p>
+                        </div>
+                    </div>
+                    
+                    <div class="conversion-stats rounded-lg p-4">
+                        <h4 class="font-semibold mb-3">Conversion Summary</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Styles converted:</span>
+                                <span class="font-mono" id="convertedStyles">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Elements processed:</span>
+                                <span class="font-mono" id="processedElements">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">File size change:</span>
+                                <span class="font-mono" id="sizeChange">0 bytes</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-4">Why Convert SVG CSS to Inline Styles?</h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+                    Flutter's SVG parser has limitations with embedded CSS. This tool ensures compatibility by converting all styles to inline attributes.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="feature-card hover-lift">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">flutter_svg Compatible</h3>
+                    <p class="text-gray-600">Converts embedded CSS to inline styles that work perfectly with Flutter's SVG library.</p>
+                </div>
+                
+                <div class="feature-card hover-lift">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Real-time Processing</h3>
+                    <p class="text-gray-600">Instant conversion with live preview and detailed statistics about the transformation.</p>
+                </div>
+                
+                <div class="feature-card hover-lift">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Error Detection</h3>
+                    <p class="text-gray-600">Smart validation and error reporting to ensure your SVGs are properly converted.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Examples Section -->
+    <section id="examples" class="py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-4">Conversion Examples</h2>
+                <p class="text-lg text-gray-600">See how different SVG structures are converted</p>
+            </div>
+            
+            <div class="space-y-8">
+                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                        <h3 class="font-semibold">Example 1: Simple CSS Classes</h3>
+                        <p class="text-sm text-gray-600 mt-1">Basic SVG with embedded CSS styles</p>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2">
+                        <div class="p-6 border-r border-gray-200">
+                            <h4 class="font-medium mb-3 text-red-600">Before (Not flutter_svg compatible)</h4>
+                            <div class="code-block text-xs">
+&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"&gt;<br>
+&nbsp;&nbsp;&lt;style&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;.st0{fill:#FF0000;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;.st1{fill:#00FF00;}<br>
+&nbsp;&nbsp;&lt;/style&gt;<br>
+&nbsp;&nbsp;&lt;circle class="st0" cx="25" cy="25" r="20"/&gt;<br>
+&nbsp;&nbsp;&lt;rect class="st1" x="50" y="10" width="40" height="40"/&gt;<br>
+&lt;/svg&gt;
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="font-medium mb-3 text-green-600">After (flutter_svg compatible)</h4>
+                            <div class="code-block text-xs">
+&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"&gt;<br>
+&nbsp;&nbsp;&lt;circle style="fill:#FF0000;" cx="25" cy="25" r="20"/&gt;<br>
+&nbsp;&nbsp;&lt;rect style="fill:#00FF00;" x="50" y="10" width="40" height="40"/&gt;<br>
+&lt;/svg&gt;
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                        <h3 class="font-semibold">Example 2: Complex Selectors</h3>
+                        <p class="text-sm text-gray-600 mt-1">SVG with CSS selectors and multiple properties</p>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2">
+                        <div class="p-6 border-r border-gray-200">
+                            <h4 class="font-medium mb-3 text-red-600">Before</h4>
+                            <div class="code-block text-xs">
+&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"&gt;<br>
+&nbsp;&nbsp;&lt;style&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;path{fill:none;stroke:#000;stroke-width:2;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;.highlight{fill:#FFD700;stroke:#FF6B6B;}<br>
+&nbsp;&nbsp;&lt;/style&gt;<br>
+&nbsp;&nbsp;&lt;path d="M10 10 L100 10 L100 100 Z"/&gt;<br>
+&nbsp;&nbsp;&lt;path class="highlight" d="M50 50 L150 50 L150 150 Z"/&gt;<br>
+&lt;/svg&gt;
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="font-medium mb-3 text-green-600">After</h4>
+                            <div class="code-block text-xs">
+&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"&gt;<br>
+&nbsp;&nbsp;&lt;path style="fill:none;stroke:#000;stroke-width:2;" d="M10 10 L100 10 L100 100 Z"/&gt;<br>
+&nbsp;&nbsp;&lt;path style="fill:#FFD700;stroke:#FF6B6B;stroke-width:2;" d="M50 50 L150 50 L150 150 Z"/&gt;<br>
+&lt;/svg&gt;
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="flex items-center justify-center space-x-3 mb-4">
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v6a4 4 0 004 4h4a2 2 0 002-2V5z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold">SVG Converter</h3>
+            </div>
+            <p class="text-gray-400 mb-4">Professional SVG to Inline CSS Converter for Flutter Developers</p>
+            <p class="text-sm text-gray-500">© 2024 SVG Converter. Built for the Flutter community.</p>
+        </div>
+    </footer>
+
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
+    <script src="main.js"></script>
+</body>
+</html>
