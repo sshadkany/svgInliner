@@ -1,18 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>SVG to Inline CSS Converter</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/material-palenight.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/material-palenight.min.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
     <style>
         :root {
             --primary: #2563eb;
@@ -177,7 +175,7 @@
         .notification.error { background: var(--error); }
         .notification.warning { background: var(--warning); }
     </style>
-</head>
+<script src="https://statics.moonshot.cn/sdk/preview-widgets.min.js" defer=""></script></head>
 <body>
     <!-- Navigation -->
     <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -251,7 +249,7 @@
                             <p class="text-gray-600 mb-2">Drop SVG file here or click to upload</p>
                             <p class="text-sm text-gray-500">Supports .svg files with embedded CSS</p>
                         </div>
-                        <input type="file" id="fileInput" accept=".svg" class="hidden" onchange="handleFileUpload(event)">
+                        <input type="file" id="fileInput" accept=".svg" class="hidden" onchange="handleFileUpload(event)"/>
                     </div>
                     
                     <div class="code-editor">
@@ -290,7 +288,7 @@
                     </div>
                     
                     <div class="code-editor">
-                        <textarea id="outputEditor" readonly placeholder="Converted SVG will appear here..."></textarea>
+                        <textarea id="outputEditor" readonly="" placeholder="Converted SVG will appear here..."></textarea>
                     </div>
                     
                     <div class="bg-white rounded-lg border border-gray-200 p-4">
@@ -328,7 +326,7 @@
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold mb-4">Why Convert SVG CSS to Inline Styles?</h2>
                 <p class="text-lg text-gray-600 max-w-3xl mx-auto">
-                    Flutter's SVG parser has limitations with embedded CSS. This tool ensures compatibility by converting all styles to inline attributes.
+                    Flutter&#39;s SVG parser has limitations with embedded CSS. This tool ensures compatibility by converting all styles to inline attributes.
                 </p>
             </div>
             
@@ -340,7 +338,7 @@
                         </svg>
                     </div>
                     <h3 class="text-xl font-semibold mb-2">flutter_svg Compatible</h3>
-                    <p class="text-gray-600">Converts embedded CSS to inline styles that work perfectly with Flutter's SVG library.</p>
+                    <p class="text-gray-600">Converts embedded CSS to inline styles that work perfectly with Flutter&#39;s SVG library.</p>
                 </div>
                 
                 <div class="feature-card hover-lift">
@@ -384,22 +382,22 @@
                         <div class="p-6 border-r border-gray-200">
                             <h4 class="font-medium mb-3 text-red-600">Before (Not flutter_svg compatible)</h4>
                             <div class="code-block text-xs">
-&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"&gt;<br>
-&nbsp;&nbsp;&lt;style&gt;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;.st0{fill:#FF0000;}<br>
-&nbsp;&nbsp;&nbsp;&nbsp;.st1{fill:#00FF00;}<br>
-&nbsp;&nbsp;&lt;/style&gt;<br>
-&nbsp;&nbsp;&lt;circle class="st0" cx="25" cy="25" r="20"/&gt;<br>
-&nbsp;&nbsp;&lt;rect class="st1" x="50" y="10" width="40" height="40"/&gt;<br>
+&lt;svg xmlns=&#34;http://www.w3.org/2000/svg&#34; viewBox=&#34;0 0 100 100&#34;&gt;<br/>
+  &lt;style&gt;<br/>
+    .st0{fill:#FF0000;}<br/>
+    .st1{fill:#00FF00;}<br/>
+  &lt;/style&gt;<br/>
+  &lt;circle class=&#34;st0&#34; cx=&#34;25&#34; cy=&#34;25&#34; r=&#34;20&#34;/&gt;<br/>
+  &lt;rect class=&#34;st1&#34; x=&#34;50&#34; y=&#34;10&#34; width=&#34;40&#34; height=&#34;40&#34;/&gt;<br/>
 &lt;/svg&gt;
                             </div>
                         </div>
                         <div class="p-6">
                             <h4 class="font-medium mb-3 text-green-600">After (flutter_svg compatible)</h4>
                             <div class="code-block text-xs">
-&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"&gt;<br>
-&nbsp;&nbsp;&lt;circle style="fill:#FF0000;" cx="25" cy="25" r="20"/&gt;<br>
-&nbsp;&nbsp;&lt;rect style="fill:#00FF00;" x="50" y="10" width="40" height="40"/&gt;<br>
+&lt;svg xmlns=&#34;http://www.w3.org/2000/svg&#34; viewBox=&#34;0 0 100 100&#34;&gt;<br/>
+  &lt;circle style=&#34;fill:#FF0000;&#34; cx=&#34;25&#34; cy=&#34;25&#34; r=&#34;20&#34;/&gt;<br/>
+  &lt;rect style=&#34;fill:#00FF00;&#34; x=&#34;50&#34; y=&#34;10&#34; width=&#34;40&#34; height=&#34;40&#34;/&gt;<br/>
 &lt;/svg&gt;
                             </div>
                         </div>
@@ -415,22 +413,22 @@
                         <div class="p-6 border-r border-gray-200">
                             <h4 class="font-medium mb-3 text-red-600">Before</h4>
                             <div class="code-block text-xs">
-&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"&gt;<br>
-&nbsp;&nbsp;&lt;style&gt;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;path{fill:none;stroke:#000;stroke-width:2;}<br>
-&nbsp;&nbsp;&nbsp;&nbsp;.highlight{fill:#FFD700;stroke:#FF6B6B;}<br>
-&nbsp;&nbsp;&lt;/style&gt;<br>
-&nbsp;&nbsp;&lt;path d="M10 10 L100 10 L100 100 Z"/&gt;<br>
-&nbsp;&nbsp;&lt;path class="highlight" d="M50 50 L150 50 L150 150 Z"/&gt;<br>
+&lt;svg xmlns=&#34;http://www.w3.org/2000/svg&#34; viewBox=&#34;0 0 200 200&#34;&gt;<br/>
+  &lt;style&gt;<br/>
+    path{fill:none;stroke:#000;stroke-width:2;}<br/>
+    .highlight{fill:#FFD700;stroke:#FF6B6B;}<br/>
+  &lt;/style&gt;<br/>
+  &lt;path d=&#34;M10 10 L100 10 L100 100 Z&#34;/&gt;<br/>
+  &lt;path class=&#34;highlight&#34; d=&#34;M50 50 L150 50 L150 150 Z&#34;/&gt;<br/>
 &lt;/svg&gt;
                             </div>
                         </div>
                         <div class="p-6">
                             <h4 class="font-medium mb-3 text-green-600">After</h4>
                             <div class="code-block text-xs">
-&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"&gt;<br>
-&nbsp;&nbsp;&lt;path style="fill:none;stroke:#000;stroke-width:2;" d="M10 10 L100 10 L100 100 Z"/&gt;<br>
-&nbsp;&nbsp;&lt;path style="fill:#FFD700;stroke:#FF6B6B;stroke-width:2;" d="M50 50 L150 50 L150 150 Z"/&gt;<br>
+&lt;svg xmlns=&#34;http://www.w3.org/2000/svg&#34; viewBox=&#34;0 0 200 200&#34;&gt;<br/>
+  &lt;path style=&#34;fill:none;stroke:#000;stroke-width:2;&#34; d=&#34;M10 10 L100 10 L100 100 Z&#34;/&gt;<br/>
+  &lt;path style=&#34;fill:#FFD700;stroke:#FF6B6B;stroke-width:2;&#34; d=&#34;M50 50 L150 50 L150 150 Z&#34;/&gt;<br/>
 &lt;/svg&gt;
                             </div>
                         </div>
@@ -460,5 +458,5 @@
     <div id="notification" class="notification"></div>
 
     <script src="main.js"></script>
-</body>
-</html>
+
+</body></html>
